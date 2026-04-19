@@ -190,7 +190,9 @@ input {
 .result-meta,
 .recipe,
 small,
-.path-item span {
+.path-card span,
+.chain-node span,
+.aspect-copy span {
   color: #a9a1c4;
 }
 
@@ -206,40 +208,49 @@ small,
   min-height: 260px;
 }
 
-.path-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+.chain-strip {
   display: grid;
-  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+  margin-bottom: 18px;
 }
 
-.path-item,
+.chain-node,
+.path-card,
 .empty-state,
 .aspect-chip {
   background: rgba(10, 8, 18, 0.72);
 }
 
-.path-item {
+.chain-node,
+.path-card {
   border: 1px solid rgba(174, 153, 255, 0.12);
-  border-radius: 16px;
-  padding: 14px 16px;
-  position: relative;
+  border-radius: 18px;
+  padding: 14px;
 }
 
-.path-item:not(:last-child)::after {
-  content: '↓';
-  position: absolute;
-  bottom: -17px;
-  left: 50%;
-  transform: translateX(-50%);
-  color: #8d78d9;
+.chain-node {
+  text-align: center;
 }
 
-.path-item strong,
-.aspect-chip strong {
+.chain-node strong,
+.path-card strong,
+.aspect-copy strong {
   display: block;
   font-size: 1.05rem;
+}
+
+.chain-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.path-card-head,
+.aspect-chip {
+  display: flex;
+  gap: 12px;
+  align-items: center;
 }
 
 .used-blocked {
@@ -255,7 +266,7 @@ small,
 
 .aspect-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 12px;
 }
 
@@ -265,14 +276,44 @@ small,
   color: #f3efff;
 }
 
-.aspect-chip span,
-.aspect-chip small {
+.aspect-copy {
+  min-width: 0;
+}
+
+.aspect-copy span,
+.aspect-copy small {
   display: block;
 }
 
 .aspect-chip.blocked {
   opacity: 0.55;
   border-style: dashed;
+}
+
+.aspect-glyph {
+  --aspect-hue: 250;
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: white;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  background:
+    radial-gradient(circle at 30% 30%, hsla(var(--aspect-hue), 85%, 78%, 0.95), transparent 28%),
+    radial-gradient(circle at 70% 70%, hsla(var(--aspect-hue), 95%, 28%, 0.95), transparent 65%),
+    hsla(var(--aspect-hue), 85%, 42%, 0.85);
+  border: 1px solid hsla(var(--aspect-hue), 100%, 85%, 0.45);
+  box-shadow: 0 0 24px hsla(var(--aspect-hue), 100%, 60%, 0.18);
+}
+
+.aspect-glyph.large {
+  width: 64px;
+  height: 64px;
+  min-width: 64px;
+  margin: 0 auto 10px;
 }
 
 @media (max-width: 900px) {

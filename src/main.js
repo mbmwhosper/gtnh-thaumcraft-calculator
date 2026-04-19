@@ -1,5 +1,12 @@
 import './style.css'
-import { allAspects, getAspectName, getCanonicalAspect, gtnhAspectData } from './data'
+import {
+  allAspects,
+  getAspectMeta,
+  getAspectName,
+  getAspectTag,
+  getCanonicalAspect,
+  gtnhAspectData,
+} from './data'
 
 const state = {
   from: 'air',
@@ -16,7 +23,7 @@ document.querySelector('#app').innerHTML = `
       <div>
         <p class="eyebrow">GTNH Thaumcraft Helper</p>
         <h1>Find valid aspect paths fast.</h1>
-        <p class="lede">A modern research calculator for GregTech New Horizons, including the extra pack-specific aspects.</p>
+        <p class="lede">A modern research calculator for GregTech New Horizons, with the pack-specific aspects and a more Thaumcraft-like presentation.</p>
       </div>
       <div class="hero-card">
         <div class="hero-stat"><span>${allAspects.length}</span><label>aspects</label></div>
@@ -47,12 +54,12 @@ document.querySelector('#app').innerHTML = `
           <button id="resetBlocked" class="ghost">Reset blocked aspects</button>
         </div>
 
-        <p class="hint">Click aspects below to block ones you do not want the solver to prefer. If no clean route exists, blocked aspects are treated as expensive rather than impossible.</p>
+        <p class="hint">Click aspects below to block ones you do not want the solver to prefer. If no clean route exists, blocked aspects are treated as expensive instead of impossible.</p>
       </section>
 
       <section class="panel results-panel">
         <div class="results-head">
-          <h2>Result</h2>
+          <h2>Research chain</h2>
           <span id="resultMeta" class="result-meta"></span>
         </div>
         <div id="result" class="result"></div>
@@ -117,7 +124,7 @@ function populateAspectSelect(select) {
   const options = allAspects
     .slice()
     .sort((a, b) => getAspectName(a).localeCompare(getAspectName(b)))
-    .map((aspect) => `<option value="${aspect}">${getAspectName(aspect)} (${aspect})</option>`)
+    .map((aspect) => `<option value="${aspect}">${getAspectName(aspect)} (${getAspectTag(aspect)})</option>`)
     .join('')
 
   select.innerHTML = options
@@ -127,25 +134,11 @@ function renderAspectList(filter = '') {
   const term = filter.trim().toLowerCase()
   const items = allAspects
     .filter((aspect) => {
-      const name = getAspectName(aspect).toLowerCase()
-      return !term || aspect.includes(term) || name.includes(term)
+      const meta = getAspectMeta(aspect)
+      return !term || aspect.includes(term) || meta.name.toLowerCase().includes(term) || meta.tag.includes(term)
     })
     .sort((a, b) => getAspectName(a).localeCompare(getAspectName(b)))
-    .map((aspect) => {
-      const blocked = state.disabled.has(aspect)
-      const parts = gtnhAspectData.compounds[aspect]
-      const recipe = parts
-        ? `${getAspectName(parts[0])} + ${getAspectName(parts[1])}`
-        : 'Primal aspect'
-
-      return `
-        <button class="aspect-chip ${blocked ? 'blocked' : ''}" data-aspect="${aspect}" type="button">
-          <strong>${getAspectName(aspect)}</strong>
-          <span>${aspect}</span>
-          <small>${recipe}</small>
-        </button>
-      `
-    })
+    .map((aspect) => renderAspectChip(aspect, state.disabled.has(aspect)))
     .join('')
 
   aspectListEl.innerHTML = items
@@ -164,6 +157,26 @@ function renderAspectList(filter = '') {
   })
 }
 
+function renderAspectChip(aspect, blocked) {
+  const meta = getAspectMeta(aspect)
+  const recipe = meta.recipe
+    ? `${getAspectName(meta.recipe[0])} + ${getAspectName(meta.recipe[1])}`
+    : 'Primal aspect'
+
+  return `
+    <button class="aspect-chip ${blocked ? 'blocked' : ''}" data-aspect="${aspect}" type="button">
+      <div class="aspect-glyph" style="${glyphStyle(aspect)}">
+        <span>${meta.tag.slice(0, 2).toUpperCase()}</span>
+      </div>
+      <div class="aspect-copy">
+        <strong>${meta.name}</strong>
+        <span>${meta.tag}</span>
+        <small>${recipe}</small>
+      </div>
+    </button>
+  `
+}
+
 function renderResult() {
   const path = findPath(state.from, state.to, state.minSteps, state.disabled)
 
@@ -180,35 +193,54 @@ function renderResult() {
 
   const interior = path.slice(1, -1)
   const blockedUsed = interior.filter((aspect) => state.disabled.has(aspect))
-
   resultMetaEl.textContent = `${Math.max(0, path.length - 2)} steps, ${blockedUsed.length} blocked aspect${blockedUsed.length === 1 ? '' : 's'} used`
 
   resultEl.innerHTML = `
-    <ol class="path-list">
-      ${path
-        .map(
-          (aspect, index) => `
-            <li class="path-item ${state.disabled.has(aspect) && index !== 0 && index !== path.length - 1 ? 'used-blocked' : ''}">
-              <div>
-                <strong>${getAspectName(aspect)}</strong>
-                <span>${aspect}</span>
-              </div>
-              ${renderRecipe(aspect)}
-            </li>
-          `,
-        )
-        .join('')}
-    </ol>
+    <div class="chain-strip">
+      ${path.map((aspect, index) => renderChainNode(aspect, index, path)).join('')}
+    </div>
+    <div class="chain-details">
+      ${path.map((aspect, index) => renderPathCard(aspect, index, path)).join('')}
+    </div>
   `
 }
 
-function renderRecipe(aspect) {
-  const parts = gtnhAspectData.compounds[aspect]
-  if (!parts) {
-    return '<small class="recipe">Primal aspect</small>'
-  }
+function renderChainNode(aspect, index, path) {
+  const blocked = state.disabled.has(aspect) && index !== 0 && index !== path.length - 1
+  return `
+    <div class="chain-node ${blocked ? 'used-blocked' : ''}">
+      <div class="aspect-glyph large" style="${glyphStyle(aspect)}"><span>${getAspectTag(aspect).slice(0, 2).toUpperCase()}</span></div>
+      <strong>${getAspectName(aspect)}</strong>
+      <span>${getAspectTag(aspect)}</span>
+    </div>
+  `
+}
 
-  return `<small class="recipe">${getAspectName(parts[0])} + ${getAspectName(parts[1])}</small>`
+function renderPathCard(aspect, index, path) {
+  const meta = getAspectMeta(aspect)
+  const blocked = state.disabled.has(aspect) && index !== 0 && index !== path.length - 1
+  const recipe = meta.recipe
+    ? `${getAspectName(meta.recipe[0])} + ${getAspectName(meta.recipe[1])}`
+    : 'Primal aspect'
+
+  return `
+    <article class="path-card ${blocked ? 'used-blocked' : ''}">
+      <div class="path-card-head">
+        <div class="aspect-glyph" style="${glyphStyle(aspect)}"><span>${meta.tag.slice(0, 2).toUpperCase()}</span></div>
+        <div>
+          <strong>${meta.name}</strong>
+          <span>${meta.tag}</span>
+        </div>
+      </div>
+      <p>${meta.description}</p>
+      <small class="recipe">${recipe}</small>
+    </article>
+  `
+}
+
+function glyphStyle(aspect) {
+  const meta = getAspectMeta(aspect)
+  return `--aspect-hue:${meta.hue};`
 }
 
 function buildGraph(compounds) {
@@ -240,14 +272,10 @@ function findPath(from, to, minSteps, disabled) {
     const depth = current.path.length - 1
     const bestKey = `${node}:${depth}`
 
-    if (best.has(bestKey) && best.get(bestKey) <= current.weight) {
-      continue
-    }
+    if (best.has(bestKey) && best.get(bestKey) <= current.weight) continue
     best.set(bestKey, current.weight)
 
-    if (node === to && depth >= minSteps + 1) {
-      return current.path
-    }
+    if (node === to && depth >= minSteps + 1) return current.path
 
     const neighbors = [...(graph.get(node) ?? [])]
     for (const rawNeighbor of neighbors) {
