@@ -418,20 +418,46 @@ function buildGraph(compounds) {
 }
 
 function findPath(from, to, minSteps, disabled) {
-  const queue = [{ path: [from], weight: 0 }]
+  const queue = [{ path: [from], penalty: 0 }]
   const best = new Map()
+  let bestSolution = null
 
   while (queue.length) {
-    queue.sort((a, b) => a.weight - b.weight || a.path.length - b.path.length)
+    queue.sort((a, b) => {
+      const aFillers = Math.max(0, a.path.length - 2)
+      const bFillers = Math.max(0, b.path.length - 2)
+      return aPenaltyScore(a, minSteps) - aPenaltyScore(b, minSteps) || aFillers - bFillers || a.penalty - b.penalty
+    })
+
     const current = queue.shift()
     const node = current.path.at(-1)
     const depth = current.path.length - 1
     const bestKey = `${node}:${depth}`
 
-    if (best.has(bestKey) && best.get(bestKey) <= current.weight) continue
-    best.set(bestKey, current.weight)
+    if (best.has(bestKey) && best.get(bestKey) <= current.penalty) continue
+    best.set(bestKey, current.penalty)
 
-    if (node === to && depth >= minSteps + 1) return current.path
+    if (node === to && depth >= minSteps + 1) {
+      if (!bestSolution) {
+        bestSolution = current.path
+      } else {
+        const currentFillers = Math.max(0, current.path.length - 2)
+        const bestFillers = Math.max(0, bestSolution.length - 2)
+        const currentBlocked = countBlocked(current.path, disabled)
+        const bestBlocked = countBlocked(bestSolution, disabled)
+
+        if (currentFillers < bestFillers || (currentFillers === bestFillers && currentBlocked < bestBlocked)) {
+          bestSolution = current.path
+        }
+      }
+      continue
+    }
+
+    if (bestSolution) {
+      const currentFillers = Math.max(0, current.path.length - 2)
+      const bestFillers = Math.max(0, bestSolution.length - 2)
+      if (currentFillers >= bestFillers) continue
+    }
 
     const neighbors = [...(graph.get(node) ?? [])]
     for (const rawNeighbor of neighbors) {
@@ -439,10 +465,20 @@ function findPath(from, to, minSteps, disabled) {
       if (current.path.length > 1 && neighbor === current.path.at(-2)) continue
 
       const nextPath = [...current.path, neighbor]
-      const extraWeight = disabled.has(neighbor) && neighbor !== to ? 100 : 1
-      queue.push({ path: nextPath, weight: current.weight + extraWeight })
+      const extraPenalty = disabled.has(neighbor) && neighbor !== to ? 1 : 0
+      queue.push({ path: nextPath, penalty: current.penalty + extraPenalty })
     }
   }
 
-  return null
+  return bestSolution
+}
+
+function aPenaltyScore(entry, minSteps) {
+  const fillers = Math.max(0, entry.path.length - 2)
+  const missing = Math.max(0, minSteps - fillers)
+  return missing * 1000 + fillers * 10 + entry.penalty
+}
+
+function countBlocked(path, disabled) {
+  return path.slice(1, -1).filter((aspect) => disabled.has(aspect)).length
 }
