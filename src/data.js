@@ -44,6 +44,7 @@ export const aspectData = {
   vinculum: { name: 'Vinculum', tag: 'vinculum', iconTag: 'vinculum', tier: 'compound', recipe: ['motus', 'perditio'], description: 'Binding, trapping, and restraint.' },
   volatus: { name: 'Volatus', tag: 'volatus', iconTag: 'volatus', tier: 'compound', recipe: ['aer', 'motus'], description: 'Flight, lift, and ascent.' },
   praecantatio: { name: 'Praecantatio', tag: 'praecantatio', iconTag: 'praecantatio', tier: 'compound', recipe: ['potentia', 'vacuos'], description: 'Arcane charge and magical force.' },
+  vitium: { name: 'Vitium', tag: 'vitium', iconTag: 'vitium', tier: 'compound', recipe: ['praecantatio', 'perditio'], description: 'Warped magical pollution and taint.' },
   radio: { name: 'Radio', tag: 'radio', iconTag: 'radio', tier: 'gtnh', recipe: ['lux', 'potentia'], description: 'Radiation and unstable energetic decay.' },
   fames: { name: 'Fames', tag: 'fames', iconTag: 'fames', tier: 'compound', recipe: ['victus', 'vacuos'], description: 'Consumption and appetite.' },
   arbor: { name: 'Arbor', tag: 'arbor', iconTag: 'arbor', tier: 'compound', recipe: ['aer', 'herba'], description: 'Wood, tree growth, and living timber.' },
