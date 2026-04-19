@@ -12,8 +12,8 @@ import {
 const PRESET_STORAGE_KEY = 'gtnh-thaumcraft-presets'
 
 const state = {
-  from: 'air',
-  to: 'fire',
+  from: 'aer',
+  to: 'ignis',
   minSteps: 1,
   disabled: new Set(),
   noteMode: true,
@@ -168,7 +168,11 @@ function populateAspectSelect(select) {
   const options = allAspects
     .slice()
     .sort((a, b) => getAspectName(a).localeCompare(getAspectName(b)))
-    .map((aspect) => `<option value="${aspect}">${getAspectName(aspect)} (${getAspectTag(aspect)})</option>`)
+    .map((aspect) => {
+      const meta = getAspectMeta(aspect)
+      const missing = meta.iconTag ? '' : ''
+      return `<option value="${aspect}">${getAspectName(aspect)} (${getAspectTag(aspect)})${missing}</option>`
+    })
     .join('')
 
   select.innerHTML = options
