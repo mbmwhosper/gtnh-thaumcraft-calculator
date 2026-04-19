@@ -374,31 +374,6 @@ small,
   margin: 0 auto 10px;
 }
 
-.ts-control,
-.ts-dropdown {
-  border-radius: 14px;
-  border: 1px solid rgba(174, 153, 255, 0.18);
-  background: rgba(8, 6, 15, 0.9);
-  color: #f5f2ff;
-}
-
-.ts-control {
-  padding: 8px 10px;
-  box-shadow: none;
-}
-
-.ts-dropdown .ts-option,
-.ts-option {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.ts-option span,
-.ts-item-tag {
-  color: #a9a1c4;
-}
-
 @media (max-width: 900px) {
   .hero,
   .results-head,

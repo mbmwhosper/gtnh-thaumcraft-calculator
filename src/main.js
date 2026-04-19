@@ -1,6 +1,4 @@
 import './style.css'
-import 'tom-select/dist/css/tom-select.css'
-import TomSelect from 'tom-select'
 import {
   allAspects,
   getAspectIconPath,
@@ -126,13 +124,13 @@ fromSelect.value = state.from
 toSelect.value = state.to
 noteModeInput.checked = state.noteMode
 
-const fromControl = createAspectSelect(fromSelect, (value) => {
-  state.from = value
+fromSelect.addEventListener('change', () => {
+  state.from = fromSelect.value
   renderResult()
 })
 
-const toControl = createAspectSelect(toSelect, (value) => {
-  state.to = value
+toSelect.addEventListener('change', () => {
+  state.to = toSelect.value
   renderResult()
 })
 
@@ -170,39 +168,14 @@ function populateAspectSelect(select) {
   const options = allAspects
     .slice()
     .sort((a, b) => getAspectName(a).localeCompare(getAspectName(b)))
-    .map((aspect) => `<option value="${aspect}">${getAspectName(aspect)} (${getAspectTag(aspect)})</option>`)
+    .map((aspect) => {
+      const meta = getAspectMeta(aspect)
+      const missing = meta.iconTag ? '' : ''
+      return `<option value="${aspect}">${getAspectName(aspect)} (${getAspectTag(aspect)})${missing}</option>`
+    })
     .join('')
 
   select.innerHTML = options
-}
-
-function createAspectSelect(element, onChange) {
-  return new TomSelect(element, {
-    create: false,
-    allowEmptyOption: false,
-    maxItems: 1,
-    valueField: 'value',
-    labelField: 'text',
-    searchField: ['text', 'value', 'tag'],
-    options: allAspects
-      .slice()
-      .sort((a, b) => getAspectName(a).localeCompare(getAspectName(b)))
-      .map((aspect) => ({
-        value: aspect,
-        text: getAspectName(aspect),
-        tag: getAspectTag(aspect),
-      })),
-    items: [element.value],
-    render: {
-      option(data, escape) {
-        return `<div class="ts-option"><strong>${escape(data.text)}</strong><span>${escape(data.tag)}</span></div>`
-      },
-      item(data, escape) {
-        return `<div>${escape(data.text)} <span class="ts-item-tag">(${escape(data.tag)})</span></div>`
-      },
-    },
-    onChange,
-  })
 }
 
 function renderAspectList(filter = '') {
