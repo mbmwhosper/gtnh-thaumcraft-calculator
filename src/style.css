@@ -1,0 +1,295 @@
+:root {
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: #ebe7ff;
+  background:
+    radial-gradient(circle at top, rgba(132, 73, 255, 0.25), transparent 35%),
+    linear-gradient(180deg, #120f1d 0%, #0b0912 100%);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+#app {
+  min-height: 100vh;
+}
+
+.shell {
+  width: min(1200px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 32px 0 48px;
+}
+
+.hero {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: end;
+  margin-bottom: 24px;
+}
+
+.eyebrow {
+  margin: 0 0 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: #b9a5ff;
+  font-size: 0.8rem;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin-top: 0;
+}
+
+h1 {
+  margin-bottom: 12px;
+  font-size: clamp(2.4rem, 5vw, 4.4rem);
+  line-height: 0.95;
+}
+
+h2 {
+  font-size: 1.2rem;
+  margin-bottom: 16px;
+}
+
+.lede {
+  max-width: 60ch;
+  color: #c9c2e6;
+}
+
+.hero-card {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(120px, 1fr));
+  gap: 12px;
+}
+
+.hero-stat,
+.panel {
+  background: rgba(19, 15, 32, 0.78);
+  border: 1px solid rgba(174, 153, 255, 0.16);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.22);
+  backdrop-filter: blur(14px);
+}
+
+.hero-stat {
+  border-radius: 18px;
+  padding: 16px 18px;
+}
+
+.hero-stat span {
+  display: block;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.hero-stat label {
+  color: #b6afcf;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.78rem;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 20px;
+}
+
+.panel {
+  border-radius: 22px;
+  padding: 22px;
+}
+
+.aspect-panel {
+  grid-column: 1 / -1;
+}
+
+.controls-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+label span {
+  display: block;
+  margin-bottom: 8px;
+  color: #c9c2e6;
+  font-size: 0.95rem;
+}
+
+select,
+input {
+  width: 100%;
+  border-radius: 14px;
+  border: 1px solid rgba(174, 153, 255, 0.18);
+  background: rgba(8, 6, 15, 0.9);
+  color: #f5f2ff;
+  padding: 12px 14px;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  margin: 18px 0 10px;
+}
+
+.primary,
+.ghost,
+.aspect-chip {
+  border-radius: 14px;
+  border: 1px solid rgba(174, 153, 255, 0.2);
+  transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.primary,
+.ghost {
+  padding: 12px 16px;
+}
+
+.primary {
+  background: linear-gradient(135deg, #8c5cff 0%, #6842f4 100%);
+  color: white;
+}
+
+.ghost {
+  background: transparent;
+  color: #ddd5ff;
+}
+
+.primary:hover,
+.ghost:hover,
+.aspect-chip:hover {
+  transform: translateY(-1px);
+  border-color: rgba(174, 153, 255, 0.45);
+}
+
+.hint,
+.result-meta,
+.recipe,
+small,
+.path-item span {
+  color: #a9a1c4;
+}
+
+.results-head,
+.aspect-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+}
+
+.result {
+  min-height: 260px;
+}
+
+.path-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.path-item,
+.empty-state,
+.aspect-chip {
+  background: rgba(10, 8, 18, 0.72);
+}
+
+.path-item {
+  border: 1px solid rgba(174, 153, 255, 0.12);
+  border-radius: 16px;
+  padding: 14px 16px;
+  position: relative;
+}
+
+.path-item:not(:last-child)::after {
+  content: '↓';
+  position: absolute;
+  bottom: -17px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #8d78d9;
+}
+
+.path-item strong,
+.aspect-chip strong {
+  display: block;
+  font-size: 1.05rem;
+}
+
+.used-blocked {
+  border-color: rgba(255, 166, 117, 0.55);
+  background: rgba(56, 30, 16, 0.72);
+}
+
+.empty-state {
+  border: 1px dashed rgba(174, 153, 255, 0.2);
+  border-radius: 18px;
+  padding: 24px;
+}
+
+.aspect-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.aspect-chip {
+  padding: 14px;
+  text-align: left;
+  color: #f3efff;
+}
+
+.aspect-chip span,
+.aspect-chip small {
+  display: block;
+}
+
+.aspect-chip.blocked {
+  opacity: 0.55;
+  border-style: dashed;
+}
+
+@media (max-width: 900px) {
+  .hero,
+  .results-head,
+  .aspect-head,
+  .actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .layout,
+  .controls-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-card {
+    width: 100%;
+  }
+}
