@@ -91,7 +91,7 @@ export function getAspectMeta(key) {
 export function getAspectIconPath(key) {
   const meta = aspectData[key]
   const iconTag = meta?.iconTag ?? meta?.tag ?? key
-  return `/aspects/color/${iconTag}.png`
+  return `./aspects/color/${iconTag}.png`
 }
 
 export function getCanonicalAspect(keyOrTag) {
