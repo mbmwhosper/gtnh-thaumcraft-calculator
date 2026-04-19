@@ -31,3 +31,13 @@ npm run preview
 ## Notes
 
 This first version is a modern rebuild inspired by ythri/tcresearch, adapted for GTNH-style aspect data and a cleaner UI.
+
+The current GTNH extra aspect mappings in the app are:
+
+- Electrum = Energy + Mechanism
+- Magneto = Metal + Flight
+- Nebrisum = Craft + Greed
+- Radio = Light + Energy
+- Strontio = Entropy + Mind
+
+These align with the known GregTech addon-style aspect set and the live GTNH source confirms the aspects themselves are present and used throughout the pack.

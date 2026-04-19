@@ -1,5 +1,5 @@
 import './style.css'
-import { allAspects, getAspectName, gtnhAspectData } from './data'
+import { allAspects, getAspectName, getCanonicalAspect, gtnhAspectData } from './data'
 
 const state = {
   from: 'air',
@@ -231,25 +231,29 @@ function buildGraph(compounds) {
 
 function findPath(from, to, minSteps, disabled) {
   const queue = [{ path: [from], weight: 0 }]
-  const visited = new Map()
+  const best = new Map()
 
   while (queue.length) {
     queue.sort((a, b) => a.weight - b.weight || a.path.length - b.path.length)
     const current = queue.shift()
     const node = current.path.at(-1)
     const depth = current.path.length - 1
-    const seenDepths = visited.get(node) ?? new Set()
+    const bestKey = `${node}:${depth}`
 
-    if (seenDepths.has(depth)) continue
-    seenDepths.add(depth)
-    visited.set(node, seenDepths)
+    if (best.has(bestKey) && best.get(bestKey) <= current.weight) {
+      continue
+    }
+    best.set(bestKey, current.weight)
 
     if (node === to && depth >= minSteps + 1) {
       return current.path
     }
 
     const neighbors = [...(graph.get(node) ?? [])]
-    for (const neighbor of neighbors) {
+    for (const rawNeighbor of neighbors) {
+      const neighbor = getCanonicalAspect(rawNeighbor)
+      if (current.path.length > 1 && neighbor === current.path.at(-2)) continue
+
       const nextPath = [...current.path, neighbor]
       const extraWeight = disabled.has(neighbor) && neighbor !== to ? 100 : 1
       queue.push({ path: nextPath, weight: current.weight + extraWeight })

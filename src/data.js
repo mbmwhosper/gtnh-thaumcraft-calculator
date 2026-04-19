@@ -46,6 +46,54 @@ export const aspectLabels = {
   stupidity: 'Strontio',
 }
 
+export const aspectKeysByTag = {
+  aer: 'air',
+  terra: 'earth',
+  ignis: 'fire',
+  aqua: 'water',
+  ordo: 'order',
+  perditio: 'entropy',
+  vacuos: 'void',
+  lux: 'light',
+  potentia: 'energy',
+  motus: 'motion',
+  victus: 'life',
+  tempestas: 'weather',
+  gelum: 'cold',
+  vitreus: 'crystal',
+  mortuus: 'death',
+  volatus: 'flight',
+  tenebrae: 'darkness',
+  spiritus: 'soul',
+  venenum: 'poison',
+  alienis: 'eldritch',
+  praecantatio: 'magic',
+  auram: 'aura',
+  vitium: 'taint',
+  herba: 'plant',
+  bestia: 'beast',
+  exanimis: 'undead',
+  cognitio: 'mind',
+  sensus: 'senses',
+  humanus: 'man',
+  metallum: 'metal',
+  instrumentum: 'tool',
+  aversio: 'aversion',
+  praemunio: 'protect',
+  fames: 'hunger',
+  lucrum: 'greed',
+  desiderium: 'desire',
+  fabrico: 'craft',
+  machina: 'mechanism',
+  vinculum: 'trap',
+  permutatio: 'exchange',
+  electrum: 'electricity',
+  magneto: 'magnetism',
+  nebrisum: 'cheatiness',
+  radio: 'radioactivity',
+  strontio: 'stupidity',
+}
+
 export const gtnhAspectData = {
   base: ['air', 'earth', 'fire', 'water', 'order', 'entropy'],
   compounds: {
@@ -90,4 +138,8 @@ export const allAspects = [...gtnhAspectData.base, ...Object.keys(gtnhAspectData
 
 export function getAspectName(key) {
   return aspectLabels[key] ?? key
+}
+
+export function getCanonicalAspect(keyOrTag) {
+  return aspectKeysByTag[keyOrTag] ?? keyOrTag
 }
