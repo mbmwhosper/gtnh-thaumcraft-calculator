@@ -23,12 +23,23 @@ body {
 
 button,
 input,
-select {
+select,
+textarea {
   font: inherit;
 }
 
 button {
   cursor: pointer;
+}
+
+textarea {
+  width: 100%;
+  border-radius: 14px;
+  border: 1px solid rgba(174, 153, 255, 0.18);
+  background: rgba(8, 6, 15, 0.9);
+  color: #f5f2ff;
+  padding: 12px 14px;
+  resize: vertical;
 }
 
 #app {
@@ -123,7 +134,8 @@ h2 {
   padding: 22px;
 }
 
-.aspect-panel {
+.aspect-panel,
+.preset-panel {
   grid-column: 1 / -1;
 }
 
@@ -150,10 +162,28 @@ input {
   padding: 12px 14px;
 }
 
-.actions {
+.actions,
+.preset-controls,
+.preset-actions,
+.toggles {
   display: flex;
   gap: 12px;
   margin: 18px 0 10px;
+  align-items: center;
+}
+
+.compact-actions {
+  margin-top: 10px;
+}
+
+.toggle-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.toggle-row input {
+  width: auto;
 }
 
 .primary,
@@ -167,6 +197,10 @@ input {
 .primary,
 .ghost {
   padding: 12px 16px;
+}
+
+.small-button {
+  padding: 8px 12px;
 }
 
 .primary {
@@ -192,12 +226,16 @@ input {
 small,
 .path-card span,
 .chain-node span,
-.aspect-copy span {
+.aspect-copy span,
+.preset-item span,
+.note-head span,
+.note-node span {
   color: #a9a1c4;
 }
 
 .results-head,
-.aspect-head {
+.aspect-head,
+.note-head {
   display: flex;
   justify-content: space-between;
   gap: 12px;
@@ -208,6 +246,15 @@ small,
   min-height: 260px;
 }
 
+.note-panel {
+  border: 1px solid rgba(174, 153, 255, 0.14);
+  border-radius: 18px;
+  padding: 16px;
+  background: rgba(10, 8, 18, 0.5);
+  margin-bottom: 16px;
+}
+
+.note-chain,
 .chain-strip {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
@@ -215,27 +262,38 @@ small,
   margin-bottom: 18px;
 }
 
+.note-link {
+  display: none;
+}
+
 .chain-node,
 .path-card,
 .empty-state,
-.aspect-chip {
+.aspect-chip,
+.preset-item,
+.note-node {
   background: rgba(10, 8, 18, 0.72);
 }
 
 .chain-node,
-.path-card {
+.path-card,
+.preset-item,
+.note-node {
   border: 1px solid rgba(174, 153, 255, 0.12);
   border-radius: 18px;
   padding: 14px;
 }
 
-.chain-node {
+.chain-node,
+.note-node {
   text-align: center;
 }
 
 .chain-node strong,
 .path-card strong,
-.aspect-copy strong {
+.aspect-copy strong,
+.preset-item strong,
+.note-node strong {
   display: block;
   font-size: 1.05rem;
 }
@@ -247,10 +305,20 @@ small,
 }
 
 .path-card-head,
-.aspect-chip {
+.aspect-chip,
+.preset-item {
   display: flex;
   gap: 12px;
   align-items: center;
+}
+
+.preset-item {
+  justify-content: space-between;
+}
+
+.preset-list {
+  display: grid;
+  gap: 10px;
 }
 
 .used-blocked {
@@ -290,26 +358,16 @@ small,
   border-style: dashed;
 }
 
-.aspect-glyph {
-  --aspect-hue: 250;
+.aspect-icon {
   width: 48px;
   height: 48px;
   min-width: 48px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  color: white;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  background:
-    radial-gradient(circle at 30% 30%, hsla(var(--aspect-hue), 85%, 78%, 0.95), transparent 28%),
-    radial-gradient(circle at 70% 70%, hsla(var(--aspect-hue), 95%, 28%, 0.95), transparent 65%),
-    hsla(var(--aspect-hue), 85%, 42%, 0.85);
-  border: 1px solid hsla(var(--aspect-hue), 100%, 85%, 0.45);
-  box-shadow: 0 0 24px hsla(var(--aspect-hue), 100%, 60%, 0.18);
+  object-fit: contain;
+  image-rendering: auto;
+  filter: drop-shadow(0 0 12px rgba(160, 130, 255, 0.2));
 }
 
-.aspect-glyph.large {
+.aspect-icon.large {
   width: 64px;
   height: 64px;
   min-width: 64px;
@@ -320,13 +378,19 @@ small,
   .hero,
   .results-head,
   .aspect-head,
-  .actions {
+  .actions,
+  .preset-controls,
+  .preset-item,
+  .preset-actions,
+  .note-head {
     flex-direction: column;
     align-items: stretch;
   }
 
   .layout,
-  .controls-grid {
+  .controls-grid,
+  .note-chain,
+  .chain-strip {
     grid-template-columns: 1fr;
   }
 

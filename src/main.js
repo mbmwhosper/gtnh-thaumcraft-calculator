@@ -1,6 +1,7 @@
 import './style.css'
 import {
   allAspects,
+  getAspectIconPath,
   getAspectMeta,
   getAspectName,
   getAspectTag,
@@ -8,11 +9,14 @@ import {
   gtnhAspectData,
 } from './data'
 
+const PRESET_STORAGE_KEY = 'gtnh-thaumcraft-presets'
+
 const state = {
   from: 'air',
   to: 'fire',
   minSteps: 1,
   disabled: new Set(),
+  noteMode: true,
 }
 
 const graph = buildGraph(gtnhAspectData.compounds)
@@ -23,7 +27,7 @@ document.querySelector('#app').innerHTML = `
       <div>
         <p class="eyebrow">GTNH Thaumcraft Helper</p>
         <h1>Find valid aspect paths fast.</h1>
-        <p class="lede">A modern research calculator for GregTech New Horizons, with the pack-specific aspects and a more Thaumcraft-like presentation.</p>
+        <p class="lede">A modern research calculator for GregTech New Horizons, with real aspect icons, presets, and a research-note view.</p>
       </div>
       <div class="hero-card">
         <div class="hero-stat"><span>${allAspects.length}</span><label>aspects</label></div>
@@ -49,6 +53,13 @@ document.querySelector('#app').innerHTML = `
           </label>
         </div>
 
+        <div class="toggles">
+          <label class="toggle-row">
+            <input id="noteMode" type="checkbox" checked />
+            <span>Research note mode</span>
+          </label>
+        </div>
+
         <div class="actions">
           <button id="findPath" class="primary">Find path</button>
           <button id="resetBlocked" class="ghost">Reset blocked aspects</button>
@@ -65,6 +76,25 @@ document.querySelector('#app').innerHTML = `
         <div id="result" class="result"></div>
       </section>
 
+      <section class="panel preset-panel">
+        <div class="results-head">
+          <h2>Blocked aspect presets</h2>
+        </div>
+        <div class="preset-controls">
+          <input id="presetName" type="text" placeholder="Preset name" />
+          <button id="savePreset" class="ghost">Save preset</button>
+          <button id="exportPreset" class="ghost">Export current</button>
+        </div>
+        <label>
+          <span>Import preset JSON</span>
+          <textarea id="presetImport" rows="4" placeholder='Paste {"name":"...","blocked":["..."]}'></textarea>
+        </label>
+        <div class="actions compact-actions">
+          <button id="importPreset" class="ghost">Import preset</button>
+        </div>
+        <div id="presetList" class="preset-list"></div>
+      </section>
+
       <section class="panel aspect-panel">
         <div class="aspect-head">
           <h2>Available aspects</h2>
@@ -79,15 +109,20 @@ document.querySelector('#app').innerHTML = `
 const fromSelect = document.querySelector('#from')
 const toSelect = document.querySelector('#to')
 const minStepsInput = document.querySelector('#minSteps')
+const noteModeInput = document.querySelector('#noteMode')
 const resultEl = document.querySelector('#result')
 const resultMetaEl = document.querySelector('#resultMeta')
 const aspectListEl = document.querySelector('#aspectList')
 const aspectSearchEl = document.querySelector('#aspectSearch')
+const presetListEl = document.querySelector('#presetList')
+const presetNameEl = document.querySelector('#presetName')
+const presetImportEl = document.querySelector('#presetImport')
 
 populateAspectSelect(fromSelect)
 populateAspectSelect(toSelect)
 fromSelect.value = state.from
 toSelect.value = state.to
+noteModeInput.checked = state.noteMode
 
 fromSelect.addEventListener('change', () => {
   state.from = fromSelect.value
@@ -106,17 +141,26 @@ minStepsInput.addEventListener('input', () => {
   renderResult()
 })
 
+noteModeInput.addEventListener('change', () => {
+  state.noteMode = noteModeInput.checked
+  renderResult()
+})
+
 document.querySelector('#findPath').addEventListener('click', renderResult)
 document.querySelector('#resetBlocked').addEventListener('click', () => {
   state.disabled.clear()
   renderAspectList(aspectSearchEl.value)
   renderResult()
 })
+document.querySelector('#savePreset').addEventListener('click', savePreset)
+document.querySelector('#exportPreset').addEventListener('click', exportCurrentPreset)
+document.querySelector('#importPreset').addEventListener('click', importPreset)
 
 aspectSearchEl.addEventListener('input', () => {
   renderAspectList(aspectSearchEl.value)
 })
 
+renderPresetList()
 renderAspectList()
 renderResult()
 
@@ -146,11 +190,8 @@ function renderAspectList(filter = '') {
   aspectListEl.querySelectorAll('[data-aspect]').forEach((button) => {
     button.addEventListener('click', () => {
       const { aspect } = button.dataset
-      if (state.disabled.has(aspect)) {
-        state.disabled.delete(aspect)
-      } else {
-        state.disabled.add(aspect)
-      }
+      if (state.disabled.has(aspect)) state.disabled.delete(aspect)
+      else state.disabled.add(aspect)
       renderAspectList(filter)
       renderResult()
     })
@@ -165,9 +206,7 @@ function renderAspectChip(aspect, blocked) {
 
   return `
     <button class="aspect-chip ${blocked ? 'blocked' : ''}" data-aspect="${aspect}" type="button">
-      <div class="aspect-glyph" style="${glyphStyle(aspect)}">
-        <span>${meta.tag.slice(0, 2).toUpperCase()}</span>
-      </div>
+      <img class="aspect-icon" src="${getAspectIconPath(aspect)}" alt="${meta.name}" />
       <div class="aspect-copy">
         <strong>${meta.name}</strong>
         <span>${meta.tag}</span>
@@ -195,7 +234,10 @@ function renderResult() {
   const blockedUsed = interior.filter((aspect) => state.disabled.has(aspect))
   resultMetaEl.textContent = `${Math.max(0, path.length - 2)} steps, ${blockedUsed.length} blocked aspect${blockedUsed.length === 1 ? '' : 's'} used`
 
+  const noteMarkup = state.noteMode ? renderResearchNote(path) : ''
+
   resultEl.innerHTML = `
+    ${noteMarkup}
     <div class="chain-strip">
       ${path.map((aspect, index) => renderChainNode(aspect, index, path)).join('')}
     </div>
@@ -205,11 +247,32 @@ function renderResult() {
   `
 }
 
+function renderResearchNote(path) {
+  return `
+    <section class="note-panel">
+      <div class="note-head">
+        <h3>Research note layout</h3>
+        <span>${Math.max(0, path.length - 2)} filler${path.length - 2 === 1 ? '' : 's'}</span>
+      </div>
+      <div class="note-chain">
+        ${path.map((aspect, index) => `
+          <div class="note-node ${index !== 0 && index !== path.length - 1 && state.disabled.has(aspect) ? 'used-blocked' : ''}">
+            <img class="aspect-icon large" src="${getAspectIconPath(aspect)}" alt="${getAspectName(aspect)}" />
+            <strong>${getAspectName(aspect)}</strong>
+            <span>${getAspectTag(aspect)}</span>
+          </div>
+        `).join('<div class="note-link">→</div>')}
+      </div>
+      <p class="hint">Read left to right: start aspect, exact fillers, then target aspect.</p>
+    </section>
+  `
+}
+
 function renderChainNode(aspect, index, path) {
   const blocked = state.disabled.has(aspect) && index !== 0 && index !== path.length - 1
   return `
     <div class="chain-node ${blocked ? 'used-blocked' : ''}">
-      <div class="aspect-glyph large" style="${glyphStyle(aspect)}"><span>${getAspectTag(aspect).slice(0, 2).toUpperCase()}</span></div>
+      <img class="aspect-icon large" src="${getAspectIconPath(aspect)}" alt="${getAspectName(aspect)}" />
       <strong>${getAspectName(aspect)}</strong>
       <span>${getAspectTag(aspect)}</span>
     </div>
@@ -226,7 +289,7 @@ function renderPathCard(aspect, index, path) {
   return `
     <article class="path-card ${blocked ? 'used-blocked' : ''}">
       <div class="path-card-head">
-        <div class="aspect-glyph" style="${glyphStyle(aspect)}"><span>${meta.tag.slice(0, 2).toUpperCase()}</span></div>
+        <img class="aspect-icon" src="${getAspectIconPath(aspect)}" alt="${meta.name}" />
         <div>
           <strong>${meta.name}</strong>
           <span>${meta.tag}</span>
@@ -238,9 +301,98 @@ function renderPathCard(aspect, index, path) {
   `
 }
 
-function glyphStyle(aspect) {
-  const meta = getAspectMeta(aspect)
-  return `--aspect-hue:${meta.hue};`
+function getStoredPresets() {
+  try {
+    return JSON.parse(localStorage.getItem(PRESET_STORAGE_KEY) ?? '[]')
+  } catch {
+    return []
+  }
+}
+
+function setStoredPresets(presets) {
+  localStorage.setItem(PRESET_STORAGE_KEY, JSON.stringify(presets))
+}
+
+function renderPresetList() {
+  const presets = getStoredPresets()
+  if (!presets.length) {
+    presetListEl.innerHTML = '<p class="hint">No saved presets yet.</p>'
+    return
+  }
+
+  presetListEl.innerHTML = presets
+    .map((preset, index) => `
+      <div class="preset-item">
+        <div>
+          <strong>${preset.name}</strong>
+          <span>${preset.blocked.length} blocked</span>
+        </div>
+        <div class="preset-actions">
+          <button class="ghost small-button" data-action="apply" data-index="${index}">Apply</button>
+          <button class="ghost small-button" data-action="delete" data-index="${index}">Delete</button>
+        </div>
+      </div>
+    `)
+    .join('')
+
+  presetListEl.querySelectorAll('[data-action]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const index = Number(button.dataset.index)
+      const action = button.dataset.action
+      const presets = getStoredPresets()
+      const preset = presets[index]
+      if (!preset) return
+
+      if (action === 'apply') {
+        state.disabled = new Set(preset.blocked.filter((aspect) => allAspects.includes(aspect)))
+        renderAspectList(aspectSearchEl.value)
+        renderResult()
+      }
+
+      if (action === 'delete') {
+        presets.splice(index, 1)
+        setStoredPresets(presets)
+        renderPresetList()
+      }
+    })
+  })
+}
+
+function savePreset() {
+  const name = presetNameEl.value.trim() || `Preset ${new Date().toLocaleString()}`
+  const presets = getStoredPresets()
+  presets.push({ name, blocked: [...state.disabled].sort() })
+  setStoredPresets(presets)
+  presetNameEl.value = ''
+  renderPresetList()
+}
+
+function exportCurrentPreset() {
+  const payload = JSON.stringify({
+    name: presetNameEl.value.trim() || 'Exported preset',
+    blocked: [...state.disabled].sort(),
+  }, null, 2)
+
+  presetImportEl.value = payload
+  presetImportEl.focus()
+  presetImportEl.select()
+}
+
+function importPreset() {
+  try {
+    const payload = JSON.parse(presetImportEl.value)
+    if (!Array.isArray(payload.blocked)) throw new Error('Invalid blocked list')
+    const presets = getStoredPresets()
+    presets.push({
+      name: payload.name || `Imported ${presets.length + 1}`,
+      blocked: payload.blocked.filter((aspect) => allAspects.includes(aspect)),
+    })
+    setStoredPresets(presets)
+    presetImportEl.value = ''
+    renderPresetList()
+  } catch {
+    presetImportEl.value = 'Invalid preset JSON'
+  }
 }
 
 function buildGraph(compounds) {

@@ -43,7 +43,7 @@ export const aspectData = {
   magnetism: { name: 'Magneto', tag: 'magneto', hue: 246, tier: 'gtnh', recipe: ['metal', 'flight'], description: 'Magnetism, pull, and field alignment.' },
   cheatiness: { name: 'Nebrisum', tag: 'nebrisum', hue: 285, tier: 'gtnh', recipe: ['craft', 'greed'], description: 'Dubious shortcuts and rule-bending trickery.' },
   radioactivity: { name: 'Radio', tag: 'radio', hue: 102, tier: 'gtnh', recipe: ['light', 'energy'], description: 'Radiation and unstable energetic decay.' },
-  stupidity: { name: 'Strontio', tag: 'strontio', hue: 314, tier: 'gtnh', recipe: ['entropy', 'mind'], description: 'Mental static, folly, and bad decisions.' },
+  stupidity: { name: 'Strontio', tag: 'strontio', iconTag: 'stronito', hue: 314, tier: 'gtnh', recipe: ['entropy', 'mind'], description: 'Mental static, folly, and bad decisions.' },
 }
 
 export const allAspects = Object.keys(aspectData)
@@ -71,6 +71,12 @@ export function getAspectTag(key) {
 
 export function getAspectMeta(key) {
   return aspectData[key]
+}
+
+export function getAspectIconPath(key) {
+  const meta = aspectData[key]
+  const iconTag = meta?.iconTag ?? meta?.tag ?? key
+  return `/aspects/color/${iconTag}.png`
 }
 
 export function getCanonicalAspect(keyOrTag) {
