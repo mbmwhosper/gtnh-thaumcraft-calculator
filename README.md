@@ -2,6 +2,12 @@
 
 A modern Thaumcraft research helper for GregTech New Horizons.
 
+## App name
+
+Suggested public name: **GTNH Thaumcraft Calculator**
+
+Alternative short name: **GTNH Aspect Solver**
+
 ## What it does
 
 - Finds a connection path between two aspects
@@ -27,6 +33,19 @@ npm run dev
 npm run build
 npm run preview
 ```
+
+## GitHub Pages
+
+A GitHub Actions workflow is included at `.github/workflows/deploy-pages.yml`.
+
+Typical setup:
+
+1. Push the repo to GitHub
+2. In GitHub, enable Pages with source set to GitHub Actions
+3. Push to `main`
+4. The workflow will build and deploy `dist`
+
+The Vite base is configured for simple static hosting.
 
 ## Notes
 
